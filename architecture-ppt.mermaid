@@ -1,0 +1,71 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#7B5E4A', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3B2A20', 'lineColor': '#A67C52', 'secondaryColor': '#F2E7D5', 'tertiaryColor': '#FAF7F0', 'fontSize': '14px'}}}%%
+
+graph TB
+    subgraph USER["👤 User"]
+        A[📱 Browser / Mobile]
+    end
+
+    subgraph FRONTEND["⚛️ React 19 Frontend"]
+        B[Landing & Auth]
+        C[Dashboard]
+        D[Food Logger]
+        E[AI Coach Chat]
+        F[Meal Planner]
+        G[Safety Auditor]
+        H[More Pages<br/>Progress · Grocery · NutriTwin]
+    end
+
+    subgraph BACKEND["🐍 FastAPI Backend"]
+        I[API Routes<br/>food · meals · chat · users · analytics]
+        J[🧠 AI Orchestrator<br/>Intent Classifier]
+
+        subgraph AGENTS["7 Specialized AI Agents"]
+            K[📚 RAG Knowledge]
+            L[🍽️ Meal Planner]
+            M[🔄 Food Swap]
+            N[🆘 NutriRescue]
+            O[🛒 Grocery]
+            P[📊 Feedback]
+            Q[📷 Food Vision]
+        end
+
+        R[🔢 Nutrition Engine<br/>IFCT 2017 Deterministic<br/>BMR · TDEE · Macros]
+        S[🛡️ Clinical Safety<br/>Allergens · Drugs · Conditions]
+        T[🔐 Auth Middleware<br/>JWT Verification]
+    end
+
+    subgraph AI["🤖 AI Providers"]
+        U[Groq — Qwen 27B<br/>Text Generation + Streaming]
+        V[Google Gemini<br/>Vision + Embeddings]
+    end
+
+    subgraph DB["🗄️ Supabase Cloud"]
+        W[(PostgreSQL<br/>17 Tables · RLS)]
+        X[(pgvector<br/>RAG Embeddings<br/>25 ICMR/WHO Articles)]
+        Y[Auth<br/>Email + Google OAuth]
+    end
+
+    A --> B & C & D & E & F & G & H
+    B & C & D & E & F & G & H -->|Vite Proxy /api| I
+    I --> T -->|Verified User| J
+    J -->|rag| K
+    J -->|plan| L
+    J -->|swap| M
+    J -->|rescue| N
+    J -->|grocery| O
+    J -->|feedback| P
+    I -->|vision| Q
+    K & L & M & N --> R
+    K & L & M & N & D & G --> S
+    K & L & M & N & O & P --> U
+    Q --> V
+    K --> X
+    R & S & I --> W
+    B --> Y
+
+    style USER fill:#3B2A20,stroke:#3B2A20,color:#F2E7D5
+    style FRONTEND fill:#FAF7F0,stroke:#D1B89A,color:#3B2A20
+    style BACKEND fill:#F2E7D5,stroke:#A67C52,color:#3B2A20
+    style AGENTS fill:#fff,stroke:#7B5E4A,color:#3B2A20
+    style AI fill:#E8F5E9,stroke:#4CAF50,color:#1B5E20
+    style DB fill:#E3F2FD,stroke:#1976D2,color:#0D47A1

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>System Design & Architecture — Diagram Viewer</title>
+<style>
+:root{--bg:#F1F5F9;--panel:#FFFFFF;--ink:#0F172A;--muted:#64748B;--line:#E2E8F0;--accent:#1E3A5F}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.1px}
+h1 small{display:block;font-weight:400;color:var(--muted);font-size:14px;margin-top:2px}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:9px}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;font-size:15px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 12px;cursor:pointer;transition:background .15s,border-color .15s}
+button:hover{background:#F8FAFC;border-color:#CBD5E1}
+.tabs button{border:0;background:transparent;padding:6px 14px}
+.tabs button.active{background:var(--panel);box-shadow:0 1px 2px rgba(15,23,42,.12);font-weight:600;color:var(--accent)}
+#stage{position:relative;flex:1;overflow:hidden;background:#fff;cursor:grab;touch-action:none;margin:14px 20px;border:1px solid var(--line);border-radius:10px}
+#stage.drag{cursor:grabbing}
+#canvas{position:absolute;left:0;top:0;transform-origin:0 0}
+#canvas svg{display:block;text-rendering:geometricPrecision;shape-rendering:geometricPrecision}
+#status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;padding:20px;text-align:center;pointer-events:none}
+#hint{position:absolute;right:12px;bottom:10px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.92);border:1px solid var(--line);padding:4px 10px;border-radius:6px;pointer-events:none}
+#desc{padding:0 20px 14px;font-size:14px;color:var(--muted)}
+/* diagram look */
+#canvas .cluster rect{rx:12px;ry:12px}
+#canvas .cluster text,#canvas .cluster span{font-weight:700 !important;font-size:20px !important}
+#canvas .node rect{rx:8px;ry:8px}
+#canvas .node text,#canvas .nodeLabel{fill:#ffffff !important;color:#ffffff !important;font-size:16px !important;font-weight:500}
+#canvas .edgePath path,#canvas path.flowchart-link{stroke:#334155 !important;stroke-width:2px !important;fill:none}
+#canvas marker path{fill:#334155 !important;stroke:#334155 !important}
+#canvas .edgeLabel rect{fill:#ffffff !important;opacity:1 !important;stroke:#CBD5E1}
+#canvas .edgeLabel,#canvas .edgeLabel text{fill:#0F172A !important;color:#0F172A !important;font-size:15px !important;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>NutriMind — System Design &amp; Architecture<small id="sub"></small></h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="tools">
+    <button id="zin" title="Zoom in">＋</button>
+    <button id="zout" title="Zoom out">－</button>
+    <button id="fit" title="Fit to screen">Fit</button>
+    <button id="one" title="Actual size">100%</button>
+    <button id="svgdl" title="Download SVG">SVG ⬇</button>
+    <button id="srcdl" title="Download .mermaid source">Source ⬇</button>
+  </div>
+</header>
+<div id="stage"><div id="canvas"></div><div id="status">Rendering diagram…</div><div id="hint">Scroll to zoom · drag to pan · double-click to fit</div></div>
+<div id="desc"></div>
+
+<script type="text/plain" id="src-architecture">%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#7B5E4A', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3B2A20', 'lineColor': '#A67C52', 'secondaryColor': '#F2E7D5', 'tertiaryColor': '#FAF7F0', 'fontSize': '14px'}}}%%
+
+graph TB
+    subgraph USER["👤 User"]
+        A[📱 Browser / Mobile]
+    end
+
+    subgraph FRONTEND["⚛️ React 19 Frontend"]
+        B[Landing & Auth]
+        C[Dashboard]
+        D[Food Logger]
+        E[AI Coach Chat]
+        F[Meal Planner]
+        G[Safety Auditor]
+        H[More Pages<br/>Progress · Grocery · NutriTwin]
+    end
+
+    subgraph BACKEND["🐍 FastAPI Backend"]
+        I[API Routes<br/>food · meals · chat · users · analytics]
+        J[🧠 AI Orchestrator<br/>Intent Classifier]
+
+        subgraph AGENTS["7 Specialized AI Agents"]
+            K[📚 RAG Knowledge]
+            L[🍽️ Meal Planner]
+            M[🔄 Food Swap]
+            N[🆘 NutriRescue]
+            O[🛒 Grocery]
+            P[📊 Feedback]
+            Q[📷 Food Vision]
+        end
+
+        R[🔢 Nutrition Engine<br/>IFCT 2017 Deterministic<br/>BMR · TDEE · Macros]
+        S[🛡️ Clinical Safety<br/>Allergens · Drugs · Conditions]
+        T[🔐 Auth Middleware<br/>JWT Verification]
+    end
+
+    subgraph AI["🤖 AI Providers"]
+        U[Groq — Qwen 27B<br/>Text Generation + Streaming]
+        V[Google Gemini<br/>Vision + Embeddings]
+    end
+
+    subgraph DB["🗄️ Supabase Cloud"]
+        W[(PostgreSQL<br/>17 Tables · RLS)]
+        X[(pgvector<br/>RAG Embeddings<br/>25 ICMR/WHO Articles)]
+        Y[Auth<br/>Email + Google OAuth]
+    end
+
+    A --> B & C & D & E & F & G & H
+    B & C & D & E & F & G & H -->|Vite Proxy /api| I
+    I --> T -->|Verified User| J
+    J -->|rag| K
+    J -->|plan| L
+    J -->|swap| M
+    J -->|rescue| N
+    J -->|grocery| O
+    J -->|feedback| P
+    I -->|vision| Q
+    K & L & M & N --> R
+    K & L & M & N & D & G --> S
+    K & L & M & N & O & P --> U
+    Q --> V
+    K --> X
+    R & S & I --> W
+    B --> Y
+
+    style USER fill:#3B2A20,stroke:#3B2A20,color:#F2E7D5
+    style FRONTEND fill:#FAF7F0,stroke:#D1B89A,color:#3B2A20
+    style BACKEND fill:#F2E7D5,stroke:#A67C52,color:#3B2A20
+    style AGENTS fill:#fff,stroke:#7B5E4A,color:#3B2A20
+    style AI fill:#E8F5E9,stroke:#4CAF50,color:#1B5E20
+    style DB fill:#E3F2FD,stroke:#1976D2,color:#0D47A1
+</script>
+<script type="text/plain" id="src-system-design">%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#7B5E4A', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3B2A20', 'lineColor': '#A67C52', 'secondaryColor': '#F2E7D5', 'tertiaryColor': '#FAF7F0', 'fontSize': '12px'}}}%%
+
+graph TB
+    %% ═══════════════════════════════════════════
+    %% CLIENT LAYER
+    %% ═══════════════════════════════════════════
+    subgraph CLIENT["CLIENT LAYER — React 19 + TypeScript + Vite 8 + Tailwind v4"]
+        direction TB
+
+        subgraph AUTH_PAGES["Auth Flow"]
+            LP[LandingPage]
+            LI[LoginPage<br/>Email + Google OAuth]
+            RG[RegisterPage]
+            OB[OnboardingPage<br/>3-Step: Biometrics → Diet → Budget]
+        end
+
+        subgraph APP_PAGES["Protected App Pages (16 routes)"]
+            DASH[DashboardPage<br/>Macro rings · AI input · Meals table · Streak]
+            TRACK[TrackerPage<br/>4 meal slots · Quick add · Edit/Delete]
+            FLOG[FoodLogPage<br/>Search · Custom food · Portion slider]
+            FANA[FoodAnalyzePage<br/>Camera → Gemini Vision → DB match]
+            PLAN[PlannerPage<br/>Day selector · Swap modal · Totals bar]
+            CHAT[ChatPage<br/>SSE streaming · Language selector · Voice · TTS]
+            SAFE[SafetyAuditorPage<br/>Allergens · Drugs · Conditions · Audit test]
+            SYMP[SymptomLogPage<br/>Food reactions · Severity · Escalation]
+            PROG[ProgressPage<br/>Weight chart · Weekly energy · Measurements]
+            TWIN[NutriTwinPage<br/>What-If sim · NutriRescue · Deficiencies]
+            GROC[GroceryPage<br/>Smart list · Pantry tracker · Fridge-to-Meal]
+            INTL[AIIntelligencePage<br/>Meal analysis · Glossary]
+            PROF[ClinicalProfilePage<br/>ICMR targets · Diet prefs · Cuisines]
+            SETT[SettingsPage<br/>Profile edit · Dark mode · ICMR card · Logout]
+            NUTR[NutritionistPage<br/>Client roster · Plan approval · Reports]
+            AUDT[AuditTrailPage<br/>Safety verdicts · Filters · CSV export]
+        end
+
+        subgraph HOOKS["Custom Hooks"]
+            H1[useAuth — Supabase session]
+            H2[useProfile — Profile + targets + localStorage cache]
+            H3[useFoodLog — Today's logs · CRUD]
+            H4[useFood — Search · Common · Frequent foods]
+            H5[useChat — SSE stream · Conversation memory]
+            H6[useMealPlan — Generate · Swap · Rescue]
+            H7[useClinicalSafety — Allergens · Drugs · Symptoms · Audit]
+            H8[useDashboard — Aggregated daily nutrition]
+            H9[useStreak — Consecutive logging days]
+        end
+
+        subgraph UI_LIB["Shared Components"]
+            U1[AppShell — Sidebar + Header + MobileNav]
+            U2[FoodSearch — Autocomplete + Custom food]
+            U3[ChatInput — Text + Voice + Language]
+            U4[ChatMessage — Markdown + TTS + Citations]
+            U5[ErrorBoundary · Skeleton · Button · Card · Input]
+            U6[SearchCommandDialog — ⌘K global search]
+            U7[ThemeContext — Light / Dark / System]
+        end
+
+        subgraph FE_LIB["Libraries"]
+            L1[lib/supabase.ts — Supabase client]
+            L2[lib/api.ts — apiGet/apiPost with auth headers]
+            L3[lib/nutrition.ts — BMR · TDEE · calculateFoodNutrition]
+            L4[types/database.ts — 15+ TypeScript interfaces]
+        end
+    end
+
+    %% ═══════════════════════════════════════════
+    %% API GATEWAY
+    %% ═══════════════════════════════════════════
+    subgraph GATEWAY["API GATEWAY — FastAPI + Pydantic"]
+        direction TB
+        MW[Supabase Auth Middleware<br/>JWT → /auth/v1/user verification]
+
+        subgraph ROUTES["REST API Routes (9 modules)"]
+            R1[GET /api/health]
+            R2[GET/POST /api/food — search · log · analyze]
+            R3[POST /api/meals — plan · swap · rescue]
+            R4[POST /api/chat — message · stream SSE · analyze]
+            R5[GET/POST /api/users — profile · targets]
+            R6[POST /api/feedback]
+            R7[GET/POST /api/grocery — generate · lists]
+            R8[GET/POST /api/analytics — weekly · what-if]
+            R9[GET/POST /api/nutritionist — clients · approve]
+        end
+    end
+
+    %% ═══════════════════════════════════════════
+    %% INTELLIGENCE LAYER
+    %% ═══════════════════════════════════════════
+    subgraph INTEL["INTELLIGENCE LAYER — Multi-Agent Orchestrator"]
+        direction TB
+
+        ORC[Orchestrator<br/>Intent Classifier: rag │ personal │ action │ general<br/>Language extraction · Safety pre-check]
+
+        subgraph AGENT_POOL["7 Specialized Agents"]
+            A1["📚 Knowledge Agent<br/>RAG retrieval → context building → cited response"]
+            A2["🍽️ Meal Plan Agent<br/>Profile + targets + consumed → JSON meal plan<br/>Budget · diet · region constrained"]
+            A3["🔄 Swap Agent<br/>Protein parity scoring · diet compatibility<br/>Top 3 alternatives with explanations"]
+            A4["🆘 Rescue Agent<br/>Deviation detection → remaining targets<br/>→ compensating dinner suggestion"]
+            A5["🛒 Grocery Agent<br/>Plan items → aggregated shopping list<br/>Grouped by aisle · cost estimated"]
+            A6["📊 Feedback Agent<br/>Classify: taste│time│budget│health<br/>Auto-adjust preferences"]
+            A7["📷 Vision Agent<br/>Image → Gemini → food identification<br/>→ DB match → IFCT nutrition"]
+        end
+    end
+
+    %% ═══════════════════════════════════════════
+    %% SERVICES LAYER
+    %% ═══════════════════════════════════════════
+    subgraph SERVICES["SERVICES LAYER"]
+        direction TB
+
+        subgraph NUTRITION["Deterministic Nutrition Engine"]
+            NE1["calculate_bmr(weight, height, age, gender)<br/>Mifflin-St Jeor: 10W + 6.25H - 5A ± gender"]
+            NE2["calculate_tdee(bmr, activity_level)<br/>Multipliers: 1.2 │ 1.375 │ 1.55 │ 1.725 │ 1.9"]
+            NE3["calculate_macro_targets(tdee, weight)<br/>Protein: 1g/kg · Fat: 25% · Carbs: remainder"]
+            NE4["calculate_food_nutrition(nv, quantity_g)<br/>value = nv_per_100g × quantity / 100"]
+        end
+
+        subgraph SAFETY["Clinical Safety Engine"]
+            SF1["Allergen Detection<br/>Direct match + hidden allergens<br/>(naan→dairy, gulab jamun→milk solids)"]
+            SF2["Cross-Reactivity<br/>peanut→legumes, shellfish→dust mites<br/>wheat→barley, dairy→goat milk"]
+            SF3["Drug-Nutrient Interactions<br/>23 interactions: Warfarin+VitK, Metformin+alcohol<br/>Statins+grapefruit, Levothyroxine+soy/calcium"]
+            SF4["Medical Conditions<br/>Diabetes+GI foods, Hypertension+sodium<br/>CKD+potassium, Gout+purines, Cholesterol+fat"]
+        end
+
+        subgraph FOOD_SVC["Food Service"]
+            FS1["search_food(query) — name + tamil + hindi + synonyms"]
+            FS2["get_common_foods() — is_common=true"]
+            FS3["get_seasonal_foods(season)"]
+            FS4["log_food_entry(user, date, meal, food, qty)"]
+        end
+
+        subgraph RAG["RAG Pipeline"]
+            RAG1["seed_knowledge.py<br/>25 ICMR/WHO articles → chunks → embeddings"]
+            RAG2["retriever.py<br/>Query → embed → pgvector cosine similarity<br/>Top 5 chunks above 0.3 threshold"]
+            RAG3["context_builder.py<br/>Evidence + user profile + conversation → prompt"]
+        end
+    end
+
+    %% ═══════════════════════════════════════════
+    %% AI PROVIDERS
+    %% ═══════════════════════════════════════════
+    subgraph AI_LAYER["AI PROVIDERS"]
+        direction LR
+        subgraph GROQ["Groq Cloud"]
+            G1["Qwen 3.8 27B<br/>Primary LLM<br/>generate() · generate_stream() · json_mode<br/>28 RPM rate limit"]
+        end
+        subgraph GOOGLE["Google AI Studio"]
+            G2["Gemini Flash<br/>Fallback LLM + Vision<br/>generate() · vision()"]
+            G3["gemini-embedding-001<br/>768-dim embeddings<br/>embed() · embed_query()"]
+        end
+        RL["Rate Limiter<br/>Per-provider request tracking<br/>Auto-failover: Groq → Google"]
+    end
+
+    %% ═══════════════════════════════════════════
+    %% DATA LAYER
+    %% ═══════════════════════════════════════════
+    subgraph DATA["DATA LAYER — Supabase (PostgreSQL + pgvector + Auth + RLS)"]
+        direction TB
+
+        subgraph TABLES["17+ Tables with Row Level Security"]
+            T1["user_profiles — name, age, gender, height, weight, diet, region, budget"]
+            T2["user_nutrition_targets — calories, protein, carbs, fat, fibre, iron, calcium, B12"]
+            T3["food_items — 200+ items, name_tamil, name_hindi, category, is_veg, cost, portion"]
+            T4["nutritional_values — per 100g: calories, protein, carbs, fat, fibre, iron, calcium, B12, VitC, potassium"]
+            T5["food_logs + food_log_items — daily meal logging with quantities"]
+            T6["meal_plans + meal_plan_items — AI-generated plans with explanations"]
+            T7["conversations + chat_messages — chat history with citations"]
+            T8["clinical_profiles — allergies, medications, conditions, clinician, consent"]
+            T9["symptom_logs — food reactions with severity and timing"]
+            T10["audit_logs — safety verdicts for every food entry"]
+            T11["pantry_items — ingredient tracking with expiry"]
+            T12["grocery_lists + grocery_items — shopping lists from plans"]
+            T13["document_chunks — RAG embeddings (768-dim pgvector)"]
+            T14["food_synonyms — Tamil/Hindi/English aliases for search"]
+            T15["allergen_cross_reactions — 15 cross-reactivity entries"]
+            T16["food_allergen_map — 30+ hidden allergen mappings"]
+            T17["drug_nutrient_interactions — 23 drug-food interactions"]
+            T18["seasonal_foods — 30 seasonal availability entries"]
+            T19["progress_measurements — weight, waist, body fat, energy"]
+        end
+
+        subgraph DB_FEATURES["Database Features"]
+            DB1["pgvector — cosine similarity for RAG retrieval"]
+            DB2["pg_trgm — fuzzy text search on food names"]
+            DB3["daily_nutrition_summary — precomputed view"]
+            DB4["Row Level Security — every table policy-protected"]
+            DB5["Supabase Auth — Email + Google OAuth + JWT"]
+        end
+    end
+
+    %% ═══════════════════════════════════════════
+    %% CONNECTIONS
+    %% ═══════════════════════════════════════════
+
+    CLIENT -->|"HTTPS · Vite Proxy /api → :8000"| GATEWAY
+    CLIENT -->|"Supabase JS SDK (direct)"| DATA
+
+    MW --> ROUTES
+    ROUTES --> ORC
+    ORC --> AGENT_POOL
+    AGENT_POOL --> NUTRITION & SAFETY & FOOD_SVC & RAG
+    AGENT_POOL --> AI_LAYER
+    RAG --> AI_LAYER
+    NUTRITION & SAFETY & FOOD_SVC --> DATA
+    RAG --> DATA
+    AI_LAYER -.->|"Rate-limited<br/>auto-failover"| RL
+
+    %% ═══════════════════════════════════════════
+    %% STYLES
+    %% ═══════════════════════════════════════════
+    style CLIENT fill:#FAF7F0,stroke:#D1B89A,color:#3B2A20
+    style GATEWAY fill:#F2E7D5,stroke:#A67C52,color:#3B2A20
+    style INTEL fill:#FFF3E0,stroke:#E65100,color:#3B2A20
+    style SERVICES fill:#E8F5E9,stroke:#2E7D32,color:#1B5E20
+    style AI_LAYER fill:#E3F2FD,stroke:#1565C0,color:#0D47A1
+    style DATA fill:#F3E5F5,stroke:#7B1FA2,color:#4A148C
+    style AUTH_PAGES fill:#fff,stroke:#D1B89A,color:#3B2A20
+    style APP_PAGES fill:#fff,stroke:#D1B89A,color:#3B2A20
+    style HOOKS fill:#fff,stroke:#7B5E4A,color:#3B2A20
+    style UI_LIB fill:#fff,stroke:#7B5E4A,color:#3B2A20
+    style FE_LIB fill:#fff,stroke:#7B5E4A,color:#3B2A20
+    style ROUTES fill:#fff,stroke:#A67C52,color:#3B2A20
+    style AGENT_POOL fill:#FFF8E1,stroke:#F57F17,color:#3B2A20
+    style NUTRITION fill:#fff,stroke:#2E7D32,color:#1B5E20
+    style SAFETY fill:#FFEBEE,stroke:#C62828,color:#B71C1C
+    style FOOD_SVC fill:#fff,stroke:#2E7D32,color:#1B5E20
+    style RAG fill:#E8EAF6,stroke:#283593,color:#1A237E
+    style GROQ fill:#fff,stroke:#1565C0,color:#0D47A1
+    style GOOGLE fill:#fff,stroke:#1565C0,color:#0D47A1
+    style TABLES fill:#fff,stroke:#7B1FA2,color:#4A148C
+    style DB_FEATURES fill:#fff,stroke:#7B1FA2,color:#4A148C
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  var DIAGRAMS=[
+    {id:"architecture",label:"Architecture (overview)",desc:"High-level architecture: frontend, FastAPI backend, AI agents, AI providers and Supabase."},
+    {id:"system-design",label:"System Design (full)",desc:"Detailed system design: client layer, API gateway, multi-agent orchestrator, services, AI providers and data layer."}
+  ];
+  var stage=document.getElementById("stage"),canvas=document.getElementById("canvas"),status=document.getElementById("status");
+  var tabs=document.getElementById("tabs"),desc=document.getElementById("desc"),sub=document.getElementById("sub");
+  var cur=null,s=1,tx=0,ty=0,nw=0,nh=0,cache={};
+  function apply(){canvas.style.transform="translate("+tx+"px,"+ty+"px) scale("+s+")"}
+  function fit(){
+    if(!nw)return;
+    var W=stage.clientWidth,H=stage.clientHeight,pad=24;
+    s=Math.min((W-pad)/nw,(H-pad)/nh);
+    tx=(W-nw*s)/2;ty=(H-nh*s)/2;apply();
+  }
+  function zoomAt(f,cx,cy){
+    var ns=Math.min(Math.max(s*f,0.05),8);f=ns/s;
+    tx=cx-(cx-tx)*f;ty=cy-(cy-ty)*f;s=ns;apply();
+  }
+  function center(f){zoomAt(f,stage.clientWidth/2,stage.clientHeight/2)}
+  function raw(id){return document.getElementById("src-"+id).textContent.trim()}
+  function src(id){
+    var text=raw(id)
+      .replace(/^%%\{init[\s\S]*?\}%%\s*/m,"")
+      .replace(/^\s*style\s+\S+\s+fill.*$/gm,"")
+      .replace(/\u2318/g,"Cmd+")
+      .replace(/[\p{Extended_Pictographic}\uFE0F\u200D]\s*/gu,"");
+    return text+"\n"+colorize(text);
+  }
+  var PAL={
+    /* architecture overview */
+    USER:"#1E293B",FRONTEND:"#1D4ED8",BACKEND:"#6D28D9",AGENTS:"#C2410C",AI:"#047857",DB:"#BE185D",
+    /* full system design */
+    CLIENT:"#1D4ED8",AUTH_PAGES:"#2563EB",APP_PAGES:"#1E40AF",HOOKS:"#0369A1",UI_LIB:"#4338CA",FE_LIB:"#0F766E",
+    GATEWAY:"#0E7490",ROUTES:"#0E7490",
+    INTEL:"#6D28D9",AGENT_POOL:"#C2410C",
+    SERVICES:"#047857",NUTRITION:"#15803D",SAFETY:"#B91C1C",FOOD_SVC:"#0F766E",RAG:"#4F46E5",
+    AI_LAYER:"#B45309",GROQ:"#B45309",GOOGLE:"#1D4ED8",
+    DATA:"#BE185D",TABLES:"#BE185D",DB_FEATURES:"#7E22CE"
+  };
+  function mix(hex,k){
+    var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+    function m(c){return Math.round(c*(1-k)+255*k)}
+    return "#"+[m(r),m(g),m(b)].map(function(v){return ("0"+v.toString(16)).slice(-2)}).join("");
+  }
+  function colorize(text){
+    var stack=[],nodes={},subs=[],out=[];
+    text.split("\n").forEach(function(line){
+      if(/^\s*%%/.test(line))return;
+      var m=line.match(/^\s*subgraph\s+([A-Za-z_]\w*)/);
+      if(m){subs.push({id:m[1],depth:stack.length,parent:stack[stack.length-1]});stack.push(m[1]);return}
+      if(/^\s*end\s*$/.test(line)){stack.pop();return}
+      m=line.match(/^\s*([A-Za-z_]\w*)\s*(\[|\(|\{|>)/);
+      if(m&&stack.length&&m[1]!=="subgraph"){nodes[m[1]]=stack.slice()}
+    });
+    function colorOf(chain){
+      for(var i=chain.length-1;i>=0;i--){if(PAL[chain[i]])return PAL[chain[i]]}
+      return "#334155";
+    }
+    var byColor={};
+    Object.keys(nodes).forEach(function(n){var c=colorOf(nodes[n]);(byColor[c]=byColor[c]||[]).push(n)});
+    Object.keys(byColor).forEach(function(c,i){
+      out.push("classDef k"+i+" fill:"+c+",stroke:"+mix(c,0.0)+",color:#ffffff,stroke-width:2px;");
+      out.push("class "+byColor[c].join(",")+" k"+i+";");
+    });
+    var chainOf={};subs.forEach(function(s){chainOf[s.id]=(s.parent?chainOf[s.parent]:[]).concat(s.id)});
+    window.__clusterColors=window.__clusterColors||{};
+    subs.forEach(function(s){
+      var c=colorOf(chainOf[s.id]);
+      out.push("style "+s.id+" fill:"+mix(c,s.depth?0.94:0.88)+",stroke:"+c+",stroke-width:"+(s.depth?2:3)+"px,color:"+c+";");
+      window.__clusterColors[s.id]=c;
+    });
+    return out.join("\n");
+  }
+  function clusterCss(){
+    var css="";
+    Object.keys(window.__clusterColors||{}).forEach(function(id){
+      css+='#canvas g.cluster[id="'+id+'"] text,#canvas g.cluster[id="'+id+'"] span{fill:'+window.__clusterColors[id]+' !important;color:'+window.__clusterColors[id]+' !important}';
+    });
+    var st=document.getElementById("clusterCss");
+    if(!st){st=document.createElement("style");st.id="clusterCss";document.head.appendChild(st)}
+    st.textContent=css;
+  }
+  function show(id){
+    var d=DIAGRAMS.filter(function(x){return x.id===id})[0]||DIAGRAMS[0];
+    cur=d;
+    Array.prototype.forEach.call(tabs.children,function(b){b.classList.toggle("active",b.dataset.id===d.id)});
+    desc.textContent=d.desc;sub.textContent=d.label;
+    try{history.replaceState(null,"","#"+d.id)}catch(e){location.hash=d.id}
+    canvas.innerHTML="";status.style.display="flex";status.textContent="Rendering diagram…";nw=0;
+    src(d.id);clusterCss();var p=cache[d.id]?Promise.resolve(cache[d.id]):mermaid.render("m-"+d.id+"-"+Date.now(),src(d.id)).then(function(r){return cache[d.id]=r.svg});
+    p.then(function(svg){
+      if(cur!==d)return;
+      canvas.innerHTML=svg;
+      var el=canvas.querySelector("svg");
+      var vb=el.viewBox&&el.viewBox.baseVal;
+      nw=(vb&&vb.width)||el.getBoundingClientRect().width;
+      nh=(vb&&vb.height)||el.getBoundingClientRect().height;
+      el.removeAttribute("style");el.setAttribute("width",nw);el.setAttribute("height",nh);
+      status.style.display="none";fit();
+    }).catch(function(e){status.textContent="Could not render diagram: "+(e&&e.message||e)});
+  }
+  DIAGRAMS.forEach(function(d){
+    var b=document.createElement("button");b.textContent=d.label;b.dataset.id=d.id;
+    b.onclick=function(){show(d.id)};tabs.appendChild(b);
+  });
+  mermaid.initialize({startOnLoad:false,securityLevel:"loose",maxTextSize:200000,theme:"base",
+    themeVariables:{fontFamily:'Inter,"Segoe UI",system-ui,sans-serif',fontSize:"18px",primaryColor:"#1D4ED8",primaryTextColor:"#FFFFFF",primaryBorderColor:"#94A3B8",lineColor:"#64748B",clusterBkg:"#F8FAFC",clusterBorder:"#CBD5E1",edgeLabelBackground:"#FFFFFF"},
+    flowchart:{useMaxWidth:false,htmlLabels:false,curve:"basis",nodeSpacing:50,rankSpacing:80,padding:18}});
+
+  stage.addEventListener("wheel",function(e){
+    e.preventDefault();var r=stage.getBoundingClientRect();
+    zoomAt(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top);
+  },{passive:false});
+  var pts={},last=null,pinch=0;
+  stage.addEventListener("pointerdown",function(e){stage.setPointerCapture(e.pointerId);pts[e.pointerId]=e;last={x:e.clientX,y:e.clientY};stage.classList.add("drag")});
+  stage.addEventListener("pointermove",function(e){
+    if(!pts[e.pointerId])return;pts[e.pointerId]=e;
+    var ids=Object.keys(pts);
+    if(ids.length===2){
+      var a=pts[ids[0]],b=pts[ids[1]],dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+      if(pinch){var r=stage.getBoundingClientRect();zoomAt(dist/pinch,(a.clientX+b.clientX)/2-r.left,(a.clientY+b.clientY)/2-r.top)}
+      pinch=dist;
+    }else if(last){tx+=e.clientX-last.x;ty+=e.clientY-last.y;last={x:e.clientX,y:e.clientY};apply()}
+  });
+  function up(e){delete pts[e.pointerId];pinch=0;last=Object.keys(pts).length?{x:e.clientX,y:e.clientY}:null;if(!last)stage.classList.remove("drag")}
+  stage.addEventListener("pointerup",up);stage.addEventListener("pointercancel",up);
+  stage.addEventListener("dblclick",fit);
+  document.getElementById("zin").onclick=function(){center(1.25)};
+  document.getElementById("zout").onclick=function(){center(1/1.25)};
+  document.getElementById("fit").onclick=fit;
+  document.getElementById("one").onclick=function(){s=1;tx=(stage.clientWidth-nw)/2;ty=20;apply()};
+  var dls=null;
+  function dl(name,text){if(dls){dls.save({filename:name,data:text}).catch(function(){})}}
+  var bS=document.getElementById("svgdl"),bT=document.getElementById("srcdl");
+  bS.hidden=bT.hidden=true;
+  if(window.claude&&claude.use){claude.use("downloads").then(function(d){if(d){dls=d;bS.hidden=bT.hidden=false}}).catch(function(){})}
+  document.getElementById("svgdl").onclick=function(){if(cache[cur.id])dl(cur.id+".svg",cache[cur.id])};
+  document.getElementById("srcdl").onclick=function(){dl(cur.id+"-mermaid-source.txt",raw(cur.id))};
+  window.addEventListener("resize",fit);
+  window.addEventListener("hashchange",function(){var h=location.hash.slice(1);if(h&&(!cur||h!==cur.id))show(h)});
+  if(typeof mermaid==="undefined"){status.textContent="Could not load the Mermaid library (check your internet connection)."}
+  else show(location.hash.slice(1)||DIAGRAMS[0].id);
+})();
+</script>
+</body>
+</html>
